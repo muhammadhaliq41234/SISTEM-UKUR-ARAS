@@ -173,7 +173,7 @@
         <!-- TAB 1: LEVELLING TABLE CONTENT -->
         <div id="tab1Content" class="space-y-6">
 
-            <!-- Warnings / Error Alert Banner -->
+            <!-- Warnings Banner -->
             <div id="warningContainer" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm">
                 <div class="flex items-start">
                     <div class="flex-shrink-0">
@@ -214,7 +214,7 @@
                                 <th class="p-3 min-w-[120px] border-r border-slate-700 bg-blue-950/70 text-blue-200" title="Reduced Level / Aras Laras">RL (m)</th>
                                 <th class="p-3 min-w-[110px] border-r border-slate-700" title="Distance / Jarak Rantaian">DISTANCE (m)</th>
                                 <th class="p-3 min-w-[160px] border-r border-slate-700 text-left">REMARKS / Catatan</th>
-                                <th class="p-3 w-20 no-print text-center">Tindakan</th>
+                                <th class="p-3 w-28 no-print text-center">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody id="levellingTableBody" class="divide-y divide-slate-200">
@@ -447,6 +447,28 @@
             updateCalculations(true);
         }
 
+        function insertRowAt(index) {
+            appState.rows.splice(index + 1, 0, { bs: "", is: "", fs: "", dist: "", remarks: "" });
+            updateCalculations(true);
+            showToast("Baris baharu telah diselipkan.");
+        }
+
+        function moveRowUp(index) {
+            if (index <= 0) return;
+            var temp = appState.rows[index];
+            appState.rows[index] = appState.rows[index - 1];
+            appState.rows[index - 1] = temp;
+            updateCalculations(true);
+        }
+
+        function moveRowDown(index) {
+            if (index >= appState.rows.length - 1) return;
+            var temp = appState.rows[index];
+            appState.rows[index] = appState.rows[index + 1];
+            appState.rows[index + 1] = temp;
+            updateCalculations(true);
+        }
+
         function deleteRow(index) {
             appState.rows.splice(index, 1);
             updateCalculations(true);
@@ -572,6 +594,10 @@
             appState.rows.forEach(function(row, index) {
                 var tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 border-b border-slate-200 transition";
+                
+                var isFirst = index === 0;
+                var isLast = index === appState.rows.length - 1;
+
                 tr.innerHTML = `
                     <td class="p-2 text-center font-bold text-slate-500 bg-slate-50 border-r border-slate-200">${index + 1}</td>
                     <td class="p-1 border-r border-slate-200 bg-sky-50/30">
@@ -593,9 +619,20 @@
                         <input type="text" value="${row.remarks || ''}" class="table-input" placeholder="Catatan..." oninput="updateRowValue(${index}, 'remarks', this.value)">
                     </td>
                     <td class="p-1 text-center no-print">
-                        <button onclick="deleteRow(${index})" class="p-1.5 text-slate-400 hover:text-red-600 rounded transition" title="Padam Row">
-                            <i class="fa-solid fa-trash-can text-sm"></i>
-                        </button>
+                        <div class="flex items-center justify-center space-x-1">
+                            <button onclick="insertRowAt(${index})" class="p-1 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded transition" title="Selip Baris Di Bawah">
+                                <i class="fa-regular fa-circle-plus text-sm"></i>
+                            </button>
+                            <button onclick="moveRowUp(${index})" ${isFirst ? 'disabled class="p-1 text-slate-300 cursor-not-allowed"' : 'class="p-1 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded transition"'} title="Pindah Ke Atas">
+                                <i class="fa-solid fa-arrow-up text-xs"></i>
+                            </button>
+                            <button onclick="moveRowDown(${index})" ${isLast ? 'disabled class="p-1 text-slate-300 cursor-not-allowed"' : 'class="p-1 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded transition"'} title="Pindah Ke Bawah">
+                                <i class="fa-solid fa-arrow-down text-xs"></i>
+                            </button>
+                            <button onclick="deleteRow(${index})" class="p-1 text-slate-400 hover:text-red-600 hover:bg-slate-100 rounded transition" title="Padam Row">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -778,12 +815,32 @@
             setTimeout(function() { toast.classList.add('hidden'); }, 3000);
         }
 
+        /* Penjana PDF Sebenar Menggunakan html2pdf.js */
         function exportToPDF() {
             showToast("Penjana PDF sedang memproses...");
-            window.print();
+
+            const element = document.querySelector('main');
+            const opt = {
+                margin:       [0.3, 0.3, 0.3, 0.3],
+                filename:     `Buku_Ukur_Aras_${new Date().toISOString().slice(0,10)}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+
+            const noPrintElements = document.querySelectorAll('.no-print');
+            noPrintElements.forEach(el => el.style.display = 'none');
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                noPrintElements.forEach(el => el.style.display = '');
+                showToast("PDF berjaya dimuat turun!");
+            }).catch(err => {
+                console.error("Gagal menjana PDF:", err);
+                noPrintElements.forEach(el => el.style.display = '');
+                showToast("Gagal menjana PDF. Sila cuba lagi.");
+            });
         }
 
-        // Initialize App on DOM Load
         document.addEventListener('DOMContentLoaded', function() {
             var today = new Date().toISOString().split('T')[0];
             document.getElementById('projDate').value = today;
