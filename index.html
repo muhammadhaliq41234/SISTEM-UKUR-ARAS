@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3062/3062634.png">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -418,6 +418,414 @@
             Sistem Ukur Aras (Rise & Fall Method) &copy; 2026. Dibina untuk kegunaan Ukur Tanah & Kejuruteraan Awam.
         </div>
     </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let appState = {
+            rows: [],
+            activeTab: 'tab1',
+            chartInstance: null
+        };
+
+        const sampleData = [
+            { bs: "1.520", is: "", fs: "", dist: "0", remarks: "Bench Mark (RL 50.000m)" },
+            { bs: "", is: "1.850", fs: "", dist: "20.5", remarks: "Tepi Parit" },
+            { bs: "", is: "2.110", fs: "", dist: "40.0", remarks: "Tengah Jalan" },
+            { bs: "1.240", is: "", fs: "2.650", dist: "60.0", remarks: "CP 1 (Change Point)" },
+            { bs: "", is: "1.530", fs: "", dist: "80.0", remarks: "Tepi Tebing" },
+            { bs: "", is: "", fs: "1.980", dist: "100.0", remarks: "TBM 2 (End Point)" }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('projDate').value = today;
+            
+            const savedData = localStorage.getItem('ukur_aras_state');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed.rows && parsed.rows.length > 0) {
+                        appState.rows = parsed.rows;
+                        if (parsed.meta) {
+                            if(parsed.meta.title) document.getElementById('projTitle').value = parsed.meta.title;
+                            if(parsed.meta.location) document.getElementById('projLocation').value = parsed.meta.location;
+                            if(parsed.meta.date) document.getElementById('projDate').value = parsed.meta.date;
+                            if(parsed.meta.surveyor) document.getElementById('projSurveyor').value = parsed.meta.surveyor;
+                            if(parsed.meta.startRL) document.getElementById('startingRL').value = parsed.meta.startRL;
+                        }
+                    } else {
+                        loadSampleData();
+                    }
+                } catch(e) {
+                    loadSampleData();
+                }
+            } else {
+                loadSampleData();
+            }
+            updateCalculations(true);
+        });
+
+        function saveToLocalStorage() {
+            const meta = {
+                title: document.getElementById('projTitle').value,
+                location: document.getElementById('projLocation').value,
+                date: document.getElementById('projDate').value,
+                surveyor: document.getElementById('projSurveyor').value,
+                startRL: document.getElementById('startingRL').value
+            };
+            localStorage.setItem('ukur_aras_state', JSON.stringify({ rows: appState.rows, meta }));
+        }
+
+        function saveMetaData() {
+            saveToLocalStorage();
+        }
+
+        function loadSampleData() {
+            appState.rows = JSON.parse(JSON.stringify(sampleData));
+            document.getElementById('startingRL').value = "50.000";
+            updateCalculations(true);
+            showToast("Contoh data telah berjaya dimuatkan!");
+        }
+
+        function addStationRow() {
+            appState.rows.push({ bs: "", is: "", fs: "", dist: "", remarks: "" });
+            updateCalculations(true);
+        }
+
+        function deleteRow(index) {
+            appState.rows.splice(index, 1);
+            updateCalculations(true);
+            showToast("Stesen telah dipadam.");
+        }
+
+        function updateRowValue(index, field, value) {
+            appState.rows[index][field] = value;
+            updateCalculations(false);
+        }
+
+        function updateCalculations(reRenderTable = false) {
+            const precision = parseInt(document.getElementById('decimalPrecision').value) || 3;
+            const startRLInput = parseFloat(document.getElementById('startingRL').value);
+            const startRL = isNaN(startRLInput) ? 0 : startRLInput;
+
+            let currentRL = startRL;
+            let sumBS = 0, sumFS = 0, sumRise = 0, sumFall = 0;
+            let firstRL = startRL;
+            let lastRL = startRL;
+
+            let prevSight = null;
+
+            appState.rows.forEach((row, i) => {
+                const bs = parseFloat(row.bs);
+                const is = parseFloat(row.is);
+                const fs = parseFloat(row.fs);
+
+                let currentSight = null;
+                if (!isNaN(bs)) currentSight = bs;
+                else if (!isNaN(is)) currentSight = is;
+                else if (!isNaN(fs)) currentSight = fs;
+
+                if (!isNaN(bs)) sumBS += bs;
+                if (!isNaN(fs)) sumFS += fs;
+
+                let rise = null;
+                let fall = null;
+
+                if (i === 0) {
+                    row.rise = "";
+                    row.fall = "";
+                    row.rl = startRL.toFixed(precision);
+                    if (currentSight !== null) prevSight = currentSight;
+                } else {
+                    if (prevSight !== null && currentSight !== null) {
+                        const diff = prevSight - currentSight;
+                        if (diff > 0) {
+                            rise = diff;
+                            sumRise += rise;
+                            currentRL += rise;
+                        } else if (diff < 0) {
+                            fall = Math.abs(diff);
+                            sumFall += fall;
+                            currentRL -= fall;
+                        }
+                        row.rise = rise !== null ? rise.toFixed(precision) : "";
+                        row.fall = fall !== null ? fall.toFixed(precision) : "";
+                        row.rl = currentRL.toFixed(precision);
+                        lastRL = currentRL;
+                    } else {
+                        row.rise = "";
+                        row.fall = "";
+                        row.rl = "";
+                    }
+
+                    if (!isNaN(bs)) {
+                        prevSight = bs;
+                    } else if (currentSight !== null) {
+                        prevSight = currentSight;
+                    }
+                }
+            });
+
+            document.getElementById('valSumBS').innerText = sumBS.toFixed(precision);
+            document.getElementById('valSumFS').innerText = sumFS.toFixed(precision);
+            const diffBSFS = sumBS - sumFS;
+            document.getElementById('valDiffBSFS').innerText = diffBSFS.toFixed(precision);
+
+            document.getElementById('valSumRise').innerText = sumRise.toFixed(precision);
+            document.getElementById('valSumFall').innerText = sumFall.toFixed(precision);
+            const diffRiseFall = sumRise - sumFall;
+            document.getElementById('valDiffRiseFall').innerText = diffRiseFall.toFixed(precision);
+
+            document.getElementById('valFirstRL').innerText = firstRL.toFixed(precision);
+            document.getElementById('valLastRL').innerText = lastRL.toFixed(precision);
+            const diffRL = lastRL - firstRL;
+            document.getElementById('valDiffRL').innerText = diffRL.toFixed(precision);
+
+            document.getElementById('formulaProofText').innerText = 
+                `${diffBSFS.toFixed(precision)} = ${diffRiseFall.toFixed(precision)} = ${diffRL.toFixed(precision)}`;
+
+            const badge = document.getElementById('checkStatusBadge');
+            const isOk = Math.abs(diffBSFS - diffRiseFall) < 0.0001 && Math.abs(diffRiseFall - diffRL) < 0.0001;
+            if (isOk && appState.rows.length > 1) {
+                badge.innerText = "SEMAKAN SEMPURNA (OK)";
+                badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-900/80 text-emerald-300 border border-emerald-700";
+            } else {
+                badge.innerText = "ADA SEMAKAN TIDAK SAMA";
+                badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-900/80 text-rose-300 border border-rose-700";
+            }
+
+            document.getElementById('rowCountBadge').innerText = `${appState.rows.length} Stesen`;
+
+            if (reRenderTable) {
+                renderTable();
+            } else {
+                updateCalculatedDOMValues(precision);
+            }
+
+            validateSequence();
+            saveToLocalStorage();
+
+            if (appState.activeTab === 'tab2') {
+                renderChart();
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('levellingTableBody');
+            tbody.innerHTML = '';
+
+            appState.rows.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-200 transition";
+                tr.innerHTML = `
+                    <td class="p-2 text-center font-bold text-slate-500 bg-slate-50 border-r border-slate-200">${index + 1}</td>
+                    <td class="p-1 border-r border-slate-200 bg-sky-50/30">
+                        <input type="text" inputmode="decimal" value="${row.bs || ''}" class="table-input font-mono-num text-center" oninput="updateRowValue(${index}, 'bs', this.value)">
+                    </td>
+                    <td class="p-1 border-r border-slate-200">
+                        <input type="text" inputmode="decimal" value="${row.is || ''}" class="table-input font-mono-num text-center" oninput="updateRowValue(${index}, 'is', this.value)">
+                    </td>
+                    <td class="p-1 border-r border-slate-200 bg-amber-50/30">
+                        <input type="text" inputmode="decimal" value="${row.fs || ''}" class="table-input font-mono-num text-center" oninput="updateRowValue(${index}, 'fs', this.value)">
+                    </td>
+                    <td class="p-2 border-r border-slate-200 text-center font-mono-num font-semibold text-emerald-600 bg-emerald-50/20" id="row-rise-${index}">${row.rise || ''}</td>
+                    <td class="p-2 border-r border-slate-200 text-center font-mono-num font-semibold text-rose-600 bg-rose-50/20" id="row-fall-${index}">${row.fall || ''}</td>
+                    <td class="p-2 border-r border-slate-200 text-center font-mono-num font-bold text-blue-700 bg-blue-50/30" id="row-rl-${index}">${row.rl || ''}</td>
+                    <td class="p-1 border-r border-slate-200">
+                        <input type="text" inputmode="decimal" value="${row.dist || ''}" class="table-input font-mono-num text-center" placeholder="m" oninput="updateRowValue(${index}, 'dist', this.value)">
+                    </td>
+                    <td class="p-1 border-r border-slate-200">
+                        <input type="text" value="${row.remarks || ''}" class="table-input" placeholder="Catatan..." oninput="updateRowValue(${index}, 'remarks', this.value)">
+                    </td>
+                    <td class="p-1 text-center no-print">
+                        <button onclick="deleteRow(${index})" class="p-1.5 text-slate-400 hover:text-red-600 rounded transition" title="Padam Row">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateCalculatedDOMValues(precision) {
+            appState.rows.forEach((row, index) => {
+                const riseEl = document.getElementById(`row-rise-${index}`);
+                const fallEl = document.getElementById(`row-fall-${index}`);
+                const rlEl = document.getElementById(`row-rl-${index}`);
+                if (riseEl) riseEl.innerText = row.rise || '';
+                if (fallEl) fallEl.innerText = row.fall || '';
+                if (rlEl) rlEl.innerText = row.rl || '';
+            });
+        }
+
+        function validateSequence() {
+            const warnings = [];
+            if (appState.rows.length > 0 && !appState.rows[0].bs) {
+                warnings.push("Stesen pertama sepatutnya mengandungi bacaan Pandangan Belakang (BS).");
+            }
+            appState.rows.forEach((row, i) => {
+                let count = 0;
+                if (row.bs) count++;
+                if (row.is) count++;
+                if (row.fs) count++;
+                if (count > 2) warnings.push(`Stesen ${i + 1}: Lebih daripada 2 bacaan dimasukkan.`);
+            });
+
+            const container = document.getElementById('warningContainer');
+            const list = document.getElementById('warningList');
+            if (warnings.length > 0) {
+                list.innerHTML = warnings.map(w => `<li>${w}</li>`).join('');
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function switchTab(tab) {
+            appState.activeTab = tab;
+            const tab1 = document.getElementById('tab1Content');
+            const tab2 = document.getElementById('tab2Content');
+            const btn1 = document.getElementById('tabBtn1');
+            const btn2 = document.getElementById('tabBtn2');
+
+            if (tab === 'tab1') {
+                tab1.classList.remove('hidden');
+                tab2.classList.add('hidden');
+                btn1.className = "border-blue-600 text-blue-600 flex items-center gap-2 py-3 px-4 border-b-2 font-semibold text-sm transition";
+                btn2.className = "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition";
+            } else {
+                tab1.classList.add('hidden');
+                tab2.classList.remove('hidden');
+                btn2.className = "border-blue-600 text-blue-600 flex items-center gap-2 py-3 px-4 border-b-2 font-semibold text-sm transition";
+                btn1.className = "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition";
+                renderChart();
+            }
+        }
+
+        function renderChart() {
+            const validPoints = appState.rows.filter(r => r.dist !== "" && r.rl !== "" && !isNaN(parseFloat(r.dist)) && !isNaN(parseFloat(r.rl)));
+            const noDistNotice = document.getElementById('noDistanceNotice');
+            const chartContainer = document.getElementById('crossSectionContainer');
+
+            if (validPoints.length < 2) {
+                noDistNotice.classList.remove('hidden');
+                chartContainer.classList.add('hidden');
+                document.getElementById('distanceBadge').innerText = "Data Jarak Kurang";
+                return;
+            }
+
+            noDistNotice.classList.add('hidden');
+            chartContainer.classList.remove('hidden');
+            document.getElementById('distanceBadge').innerText = `${validPoints.length} Point Diplot`;
+
+            const labels = validPoints.map(p => parseFloat(p.dist));
+            const rls = validPoints.map(p => parseFloat(p.rl));
+
+            const totalDist = Math.max(...labels) - Math.min(...labels);
+            const minRL = Math.min(...rls);
+            const maxRL = Math.max(...rls);
+
+            document.getElementById('statTotalDist').innerText = `${totalDist.toFixed(2)} m`;
+            document.getElementById('statMinRL').innerText = `${minRL.toFixed(3)} m`;
+            document.getElementById('statMaxRL').innerText = `${maxRL.toFixed(3)} m`;
+            document.getElementById('statPlottedPoints').innerText = `${validPoints.length} Stesen`;
+
+            const tbody = document.getElementById('crossSectionTableBody');
+            tbody.innerHTML = '';
+            validPoints.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2 border-r border-slate-200">Stesen ${idx + 1}</td>
+                    <td class="p-2 border-r border-slate-200">${p.dist} m</td>
+                    <td class="p-2 border-r border-slate-200 font-bold text-blue-700 bg-blue-50/30">${p.rl} m</td>
+                    <td class="p-2 text-left font-sans text-slate-600">${p.remarks || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const ctx = document.getElementById('crossSectionCanvas').getContext('2d');
+            if (appState.chartInstance) appState.chartInstance.destroy();
+
+            const vEx = parseFloat(document.getElementById('vExaggeration').value) || 2;
+
+            appState.chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Profil Aras Tanah (RL)',
+                        data: rls,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#1d4ed8',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: 'Jarak / Distance (m)', font: { weight: 'bold' } },
+                            grid: { color: '#e2e8f0' }
+                        },
+                        y: {
+                            title: { display: true, text: `Aras Laras / Reduced Level (m) [Gandaan ${vEx}x]`, font: { weight: 'bold' } },
+                            grid: { color: '#e2e8f0' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `RL: ${ctx.parsed.y.toFixed(3)} m (Jarak: ${ctx.parsed.x}m)`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function downloadChartPNG() {
+            if (!appState.chartInstance) return;
+            const link = document.createElement('a');
+            link.download = 'cross-section-profile.png';
+            link.href = appState.chartInstance.toBase64Image();
+            link.click();
+        }
+
+        function openResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function executeReset() {
+            appState.rows = [{ bs: "", is: "", fs: "", dist: "", remarks: "" }];
+            document.getElementById('startingRL').value = "50.000";
+            updateCalculations(true);
+            closeResetModal();
+            showToast("Semua data telah direset.");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        function exportToPDF() {
+            showToast("Penjana PDF sedang memproses...");
+            window.print();
+        }
+    </script>
 
     <!-- Service Worker Registration for PWA -->
     <script>
