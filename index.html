@@ -8,8 +8,7 @@
     <!-- PWA Settings & Meta Tags -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3062/3062634.png">
 
     <!-- Tailwind CSS -->
@@ -34,7 +33,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Custom Scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -50,7 +48,6 @@
             background: #94a3b8;
         }
 
-        /* Input styling */
         .table-input {
             width: 100%;
             padding: 0.375rem 0.5rem;
@@ -66,7 +63,6 @@
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
         }
 
-        /* Printable PDF section styles */
         @media print {
             .no-print {
                 display: none !important;
@@ -222,7 +218,6 @@
                             </tr>
                         </thead>
                         <tbody id="levellingTableBody" class="divide-y divide-slate-200">
-                            <!-- Rows dynamically populated by JS -->
                         </tbody>
                     </table>
                 </div>
@@ -241,7 +236,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono-num text-xs">
-                    <!-- Check 1: BS - FS -->
                     <div class="bg-slate-800/80 p-3.5 rounded-lg border border-slate-700/80">
                         <div class="text-slate-400 text-[11px] mb-1 font-sans">1. Jumlah Pandangan (&Sigma;BS - &Sigma;FS)</div>
                         <div class="flex justify-between items-baseline mb-1">
@@ -254,7 +248,6 @@
                         </div>
                     </div>
 
-                    <!-- Check 2: Rise - Fall -->
                     <div class="bg-slate-800/80 p-3.5 rounded-lg border border-slate-700/80">
                         <div class="text-slate-400 text-[11px] mb-1 font-sans">2. Jumlah Naik/Turun (&Sigma;Rise - &Sigma;Fall)</div>
                         <div class="flex justify-between items-baseline mb-1">
@@ -267,7 +260,6 @@
                         </div>
                     </div>
 
-                    <!-- Check 3: Last RL - First RL -->
                     <div class="bg-slate-800/80 p-3.5 rounded-lg border border-slate-700/80">
                         <div class="text-slate-400 text-[11px] mb-1 font-sans">3. Beza Aras Laras (Last RL - First RL)</div>
                         <div class="flex justify-between items-baseline mb-1">
@@ -281,7 +273,6 @@
                     </div>
                 </div>
 
-                <!-- Equation Proof Bar -->
                 <div class="mt-4 pt-3 border-t border-slate-800 text-center text-xs text-slate-400 font-mono-num flex flex-wrap items-center justify-center gap-3">
                     <span class="bg-slate-800 px-2 py-1 rounded">Formulasi: &Sigma;BS - &Sigma;FS = &Sigma;Rise - &Sigma;Fall = Last RL - First RL</span>
                     <span id="formulaProofText" class="font-bold text-emerald-400">0.000 = 0.000 = 0.000</span>
@@ -293,7 +284,6 @@
         <!-- TAB 2: CROSS SECTION CONTENT -->
         <div id="tab2Content" class="hidden space-y-6">
 
-            <!-- Empty Distance Alert -->
             <div id="noDistanceNotice" class="hidden bg-white border border-slate-200 rounded-xl p-8 text-center shadow-sm">
                 <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
                     <i class="fa-solid fa-chart-area text-2xl"></i>
@@ -308,9 +298,7 @@
                 </div>
             </div>
 
-            <!-- Active Cross Section Chart Container -->
             <div id="crossSectionContainer" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
-                <!-- Chart Controls Toolbar -->
                 <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
                     <div>
                         <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
@@ -337,12 +325,10 @@
                     </div>
                 </div>
 
-                <!-- Canvas Wrapper -->
                 <div class="relative w-full h-[420px] bg-slate-50/50 rounded-lg p-2 border border-slate-200">
                     <canvas id="crossSectionCanvas"></canvas>
                 </div>
 
-                <!-- Distance Stats Breakdown -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
                     <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
                         <span class="block text-[11px] font-medium text-slate-500">Jumlah Jarak (Total Distance)</span>
@@ -362,7 +348,6 @@
                     </div>
                 </div>
 
-                <!-- Senarai Data RL Sebenar & Jarak -->
                 <div class="mt-6 border-t border-slate-200 pt-4">
                     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-1.5">
                         <i class="fa-solid fa-list-check text-blue-600"></i> Jadual Data Point Cross Section (Aras Laras Sebenar)
@@ -378,7 +363,6 @@
                                 </tr>
                             </thead>
                             <tbody id="crossSectionTableBody" class="divide-y divide-slate-200 font-mono-num text-center">
-                                <!-- Populated dynamically by JS -->
                             </tbody>
                         </table>
                     </div>
@@ -389,7 +373,7 @@
 
     </main>
 
-    <!-- Custom Reset Confirmation Modal -->
+    <!-- Reset Modal -->
     <div id="resetModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 border border-slate-200">
             <div class="flex items-center gap-3 text-amber-600 mb-3">
@@ -419,15 +403,15 @@
         </div>
     </footer>
 
-    <!-- JavaScript Application Logic -->
+    <!-- Global Application Logic -->
     <script>
-        let appState = {
+        var appState = {
             rows: [],
             activeTab: 'tab1',
             chartInstance: null
         };
 
-        const sampleData = [
+        var sampleData = [
             { bs: "1.520", is: "", fs: "", dist: "0", remarks: "Bench Mark (RL 50.000m)" },
             { bs: "", is: "1.850", fs: "", dist: "20.5", remarks: "Tepi Parit" },
             { bs: "", is: "2.110", fs: "", dist: "40.0", remarks: "Tengah Jalan" },
@@ -436,44 +420,15 @@
             { bs: "", is: "", fs: "1.980", dist: "100.0", remarks: "TBM 2 (End Point)" }
         ];
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('projDate').value = today;
-            
-            const savedData = localStorage.getItem('ukur_aras_state');
-            if (savedData) {
-                try {
-                    const parsed = JSON.parse(savedData);
-                    if (parsed.rows && parsed.rows.length > 0) {
-                        appState.rows = parsed.rows;
-                        if (parsed.meta) {
-                            if(parsed.meta.title) document.getElementById('projTitle').value = parsed.meta.title;
-                            if(parsed.meta.location) document.getElementById('projLocation').value = parsed.meta.location;
-                            if(parsed.meta.date) document.getElementById('projDate').value = parsed.meta.date;
-                            if(parsed.meta.surveyor) document.getElementById('projSurveyor').value = parsed.meta.surveyor;
-                            if(parsed.meta.startRL) document.getElementById('startingRL').value = parsed.meta.startRL;
-                        }
-                    } else {
-                        loadSampleData();
-                    }
-                } catch(e) {
-                    loadSampleData();
-                }
-            } else {
-                loadSampleData();
-            }
-            updateCalculations(true);
-        });
-
         function saveToLocalStorage() {
-            const meta = {
+            var meta = {
                 title: document.getElementById('projTitle').value,
                 location: document.getElementById('projLocation').value,
                 date: document.getElementById('projDate').value,
                 surveyor: document.getElementById('projSurveyor').value,
                 startRL: document.getElementById('startingRL').value
             };
-            localStorage.setItem('ukur_aras_state', JSON.stringify({ rows: appState.rows, meta }));
+            localStorage.setItem('ukur_aras_state', JSON.stringify({ rows: appState.rows, meta: meta }));
         }
 
         function saveMetaData() {
@@ -503,33 +458,33 @@
             updateCalculations(false);
         }
 
-        function updateCalculations(reRenderTable = false) {
-            const precision = parseInt(document.getElementById('decimalPrecision').value) || 3;
-            const startRLInput = parseFloat(document.getElementById('startingRL').value);
-            const startRL = isNaN(startRLInput) ? 0 : startRLInput;
+        function updateCalculations(reRenderTable) {
+            if (typeof reRenderTable === 'undefined') reRenderTable = false;
+            var precision = parseInt(document.getElementById('decimalPrecision').value) || 3;
+            var startRLInput = parseFloat(document.getElementById('startingRL').value);
+            var startRL = isNaN(startRLInput) ? 0 : startRLInput;
 
-            let currentRL = startRL;
-            let sumBS = 0, sumFS = 0, sumRise = 0, sumFall = 0;
-            let firstRL = startRL;
-            let lastRL = startRL;
+            var currentRL = startRL;
+            var sumBS = 0, sumFS = 0, sumRise = 0, sumFall = 0;
+            var firstRL = startRL;
+            var lastRL = startRL;
+            var prevSight = null;
 
-            let prevSight = null;
+            appState.rows.forEach(function(row, i) {
+                var bs = parseFloat(row.bs);
+                var isVal = parseFloat(row.is);
+                var fs = parseFloat(row.fs);
 
-            appState.rows.forEach((row, i) => {
-                const bs = parseFloat(row.bs);
-                const is = parseFloat(row.is);
-                const fs = parseFloat(row.fs);
-
-                let currentSight = null;
+                var currentSight = null;
                 if (!isNaN(bs)) currentSight = bs;
-                else if (!isNaN(is)) currentSight = is;
+                else if (!isNaN(isVal)) currentSight = isVal;
                 else if (!isNaN(fs)) currentSight = fs;
 
                 if (!isNaN(bs)) sumBS += bs;
                 if (!isNaN(fs)) sumFS += fs;
 
-                let rise = null;
-                let fall = null;
+                var rise = null;
+                var fall = null;
 
                 if (i === 0) {
                     row.rise = "";
@@ -538,7 +493,7 @@
                     if (currentSight !== null) prevSight = currentSight;
                 } else {
                     if (prevSight !== null && currentSight !== null) {
-                        const diff = prevSight - currentSight;
+                        var diff = prevSight - currentSight;
                         if (diff > 0) {
                             rise = diff;
                             sumRise += rise;
@@ -568,24 +523,24 @@
 
             document.getElementById('valSumBS').innerText = sumBS.toFixed(precision);
             document.getElementById('valSumFS').innerText = sumFS.toFixed(precision);
-            const diffBSFS = sumBS - sumFS;
+            var diffBSFS = sumBS - sumFS;
             document.getElementById('valDiffBSFS').innerText = diffBSFS.toFixed(precision);
 
             document.getElementById('valSumRise').innerText = sumRise.toFixed(precision);
             document.getElementById('valSumFall').innerText = sumFall.toFixed(precision);
-            const diffRiseFall = sumRise - sumFall;
+            var diffRiseFall = sumRise - sumFall;
             document.getElementById('valDiffRiseFall').innerText = diffRiseFall.toFixed(precision);
 
             document.getElementById('valFirstRL').innerText = firstRL.toFixed(precision);
             document.getElementById('valLastRL').innerText = lastRL.toFixed(precision);
-            const diffRL = lastRL - firstRL;
+            var diffRL = lastRL - firstRL;
             document.getElementById('valDiffRL').innerText = diffRL.toFixed(precision);
 
             document.getElementById('formulaProofText').innerText = 
-                `${diffBSFS.toFixed(precision)} = ${diffRiseFall.toFixed(precision)} = ${diffRL.toFixed(precision)}`;
+                diffBSFS.toFixed(precision) + " = " + diffRiseFall.toFixed(precision) + " = " + diffRL.toFixed(precision);
 
-            const badge = document.getElementById('checkStatusBadge');
-            const isOk = Math.abs(diffBSFS - diffRiseFall) < 0.0001 && Math.abs(diffRiseFall - diffRL) < 0.0001;
+            var badge = document.getElementById('checkStatusBadge');
+            var isOk = Math.abs(diffBSFS - diffRiseFall) < 0.0001 && Math.abs(diffRiseFall - diffRL) < 0.0001;
             if (isOk && appState.rows.length > 1) {
                 badge.innerText = "SEMAKAN SEMPURNA (OK)";
                 badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-900/80 text-emerald-300 border border-emerald-700";
@@ -594,12 +549,12 @@
                 badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-900/80 text-rose-300 border border-rose-700";
             }
 
-            document.getElementById('rowCountBadge').innerText = `${appState.rows.length} Stesen`;
+            document.getElementById('rowCountBadge').innerText = appState.rows.length + " Stesen";
 
             if (reRenderTable) {
                 renderTable();
             } else {
-                updateCalculatedDOMValues(precision);
+                updateCalculatedDOMValues();
             }
 
             validateSequence();
@@ -611,11 +566,11 @@
         }
 
         function renderTable() {
-            const tbody = document.getElementById('levellingTableBody');
+            var tbody = document.getElementById('levellingTableBody');
             tbody.innerHTML = '';
 
-            appState.rows.forEach((row, index) => {
-                const tr = document.createElement('tr');
+            appState.rows.forEach(function(row, index) {
+                var tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 border-b border-slate-200 transition";
                 tr.innerHTML = `
                     <td class="p-2 text-center font-bold text-slate-500 bg-slate-50 border-r border-slate-200">${index + 1}</td>
@@ -647,11 +602,11 @@
             });
         }
 
-        function updateCalculatedDOMValues(precision) {
-            appState.rows.forEach((row, index) => {
-                const riseEl = document.getElementById(`row-rise-${index}`);
-                const fallEl = document.getElementById(`row-fall-${index}`);
-                const rlEl = document.getElementById(`row-rl-${index}`);
+        function updateCalculatedDOMValues() {
+            appState.rows.forEach(function(row, index) {
+                var riseEl = document.getElementById('row-rise-' + index);
+                var fallEl = document.getElementById('row-fall-' + index);
+                var rlEl = document.getElementById('row-rl-' + index);
                 if (riseEl) riseEl.innerText = row.rise || '';
                 if (fallEl) fallEl.innerText = row.fall || '';
                 if (rlEl) rlEl.innerText = row.rl || '';
@@ -659,22 +614,22 @@
         }
 
         function validateSequence() {
-            const warnings = [];
+            var warnings = [];
             if (appState.rows.length > 0 && !appState.rows[0].bs) {
                 warnings.push("Stesen pertama sepatutnya mengandungi bacaan Pandangan Belakang (BS).");
             }
-            appState.rows.forEach((row, i) => {
-                let count = 0;
+            appState.rows.forEach(function(row, i) {
+                var count = 0;
                 if (row.bs) count++;
                 if (row.is) count++;
                 if (row.fs) count++;
-                if (count > 2) warnings.push(`Stesen ${i + 1}: Lebih daripada 2 bacaan dimasukkan.`);
+                if (count > 2) warnings.push("Stesen " + (i + 1) + ": Lebih daripada 2 bacaan dimasukkan.");
             });
 
-            const container = document.getElementById('warningContainer');
-            const list = document.getElementById('warningList');
+            var container = document.getElementById('warningContainer');
+            var list = document.getElementById('warningList');
             if (warnings.length > 0) {
-                list.innerHTML = warnings.map(w => `<li>${w}</li>`).join('');
+                list.innerHTML = warnings.map(function(w) { return "<li>" + w + "</li>"; }).join('');
                 container.classList.remove('hidden');
             } else {
                 container.classList.add('hidden');
@@ -683,10 +638,10 @@
 
         function switchTab(tab) {
             appState.activeTab = tab;
-            const tab1 = document.getElementById('tab1Content');
-            const tab2 = document.getElementById('tab2Content');
-            const btn1 = document.getElementById('tabBtn1');
-            const btn2 = document.getElementById('tabBtn2');
+            var tab1 = document.getElementById('tab1Content');
+            var tab2 = document.getElementById('tab2Content');
+            var btn1 = document.getElementById('tabBtn1');
+            var btn2 = document.getElementById('tabBtn2');
 
             if (tab === 'tab1') {
                 tab1.classList.remove('hidden');
@@ -703,9 +658,11 @@
         }
 
         function renderChart() {
-            const validPoints = appState.rows.filter(r => r.dist !== "" && r.rl !== "" && !isNaN(parseFloat(r.dist)) && !isNaN(parseFloat(r.rl)));
-            const noDistNotice = document.getElementById('noDistanceNotice');
-            const chartContainer = document.getElementById('crossSectionContainer');
+            var validPoints = appState.rows.filter(function(r) {
+                return r.dist !== "" && r.rl !== "" && !isNaN(parseFloat(r.dist)) && !isNaN(parseFloat(r.rl));
+            });
+            var noDistNotice = document.getElementById('noDistanceNotice');
+            var chartContainer = document.getElementById('crossSectionContainer');
 
             if (validPoints.length < 2) {
                 noDistNotice.classList.remove('hidden');
@@ -716,24 +673,24 @@
 
             noDistNotice.classList.add('hidden');
             chartContainer.classList.remove('hidden');
-            document.getElementById('distanceBadge').innerText = `${validPoints.length} Point Diplot`;
+            document.getElementById('distanceBadge').innerText = validPoints.length + " Point Diplot";
 
-            const labels = validPoints.map(p => parseFloat(p.dist));
-            const rls = validPoints.map(p => parseFloat(p.rl));
+            var labels = validPoints.map(function(p) { return parseFloat(p.dist); });
+            var rls = validPoints.map(function(p) { return parseFloat(p.rl); });
 
-            const totalDist = Math.max(...labels) - Math.min(...labels);
-            const minRL = Math.min(...rls);
-            const maxRL = Math.max(...rls);
+            var totalDist = Math.max.apply(null, labels) - Math.min.apply(null, labels);
+            var minRL = Math.min.apply(null, rls);
+            var maxRL = Math.max.apply(null, rls);
 
-            document.getElementById('statTotalDist').innerText = `${totalDist.toFixed(2)} m`;
-            document.getElementById('statMinRL').innerText = `${minRL.toFixed(3)} m`;
-            document.getElementById('statMaxRL').innerText = `${maxRL.toFixed(3)} m`;
-            document.getElementById('statPlottedPoints').innerText = `${validPoints.length} Stesen`;
+            document.getElementById('statTotalDist').innerText = totalDist.toFixed(2) + " m";
+            document.getElementById('statMinRL').innerText = minRL.toFixed(3) + " m";
+            document.getElementById('statMaxRL').innerText = maxRL.toFixed(3) + " m";
+            document.getElementById('statPlottedPoints').innerText = validPoints.length + " Stesen";
 
-            const tbody = document.getElementById('crossSectionTableBody');
+            var tbody = document.getElementById('crossSectionTableBody');
             tbody.innerHTML = '';
-            validPoints.forEach((p, idx) => {
-                const tr = document.createElement('tr');
+            validPoints.forEach(function(p, idx) {
+                var tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="p-2 border-r border-slate-200">Stesen ${idx + 1}</td>
                     <td class="p-2 border-r border-slate-200">${p.dist} m</td>
@@ -743,10 +700,10 @@
                 tbody.appendChild(tr);
             });
 
-            const ctx = document.getElementById('crossSectionCanvas').getContext('2d');
+            var ctx = document.getElementById('crossSectionCanvas').getContext('2d');
             if (appState.chartInstance) appState.chartInstance.destroy();
 
-            const vEx = parseFloat(document.getElementById('vExaggeration').value) || 2;
+            var vEx = parseFloat(document.getElementById('vExaggeration').value) || 2;
 
             appState.chartInstance = new Chart(ctx, {
                 type: 'line',
@@ -775,14 +732,14 @@
                             grid: { color: '#e2e8f0' }
                         },
                         y: {
-                            title: { display: true, text: `Aras Laras / Reduced Level (m) [Gandaan ${vEx}x]`, font: { weight: 'bold' } },
+                            title: { display: true, text: 'Aras Laras / Reduced Level (m) [Gandaan ' + vEx + 'x]', font: { weight: 'bold' } },
                             grid: { color: '#e2e8f0' }
                         }
                     },
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => `RL: ${ctx.parsed.y.toFixed(3)} m (Jarak: ${ctx.parsed.x}m)`
+                                label: function(ctx) { return 'RL: ' + ctx.parsed.y.toFixed(3) + ' m (Jarak: ' + ctx.parsed.x + 'm)'; }
                             }
                         }
                     }
@@ -792,7 +749,7 @@
 
         function downloadChartPNG() {
             if (!appState.chartInstance) return;
-            const link = document.createElement('a');
+            var link = document.createElement('a');
             link.download = 'cross-section-profile.png';
             link.href = appState.chartInstance.toBase64Image();
             link.click();
@@ -815,25 +772,55 @@
         }
 
         function showToast(msg) {
-            const toast = document.getElementById('toastNotification');
+            var toast = document.getElementById('toastNotification');
             document.getElementById('toastMessage').innerText = msg;
             toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
+            setTimeout(function() { toast.classList.add('hidden'); }, 3000);
         }
 
         function exportToPDF() {
             showToast("Penjana PDF sedang memproses...");
             window.print();
         }
+
+        // Initialize App on DOM Load
+        document.addEventListener('DOMContentLoaded', function() {
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById('projDate').value = today;
+            
+            var savedData = localStorage.getItem('ukur_aras_state');
+            if (savedData) {
+                try {
+                    var parsed = JSON.parse(savedData);
+                    if (parsed.rows && parsed.rows.length > 0) {
+                        appState.rows = parsed.rows;
+                        if (parsed.meta) {
+                            if(parsed.meta.title) document.getElementById('projTitle').value = parsed.meta.title;
+                            if(parsed.meta.location) document.getElementById('projLocation').value = parsed.meta.location;
+                            if(parsed.meta.date) document.getElementById('projDate').value = parsed.meta.date;
+                            if(parsed.meta.surveyor) document.getElementById('projSurveyor').value = parsed.meta.surveyor;
+                            if(parsed.meta.startRL) document.getElementById('startingRL').value = parsed.meta.startRL;
+                        }
+                    } else {
+                        loadSampleData();
+                    }
+                } catch(e) {
+                    loadSampleData();
+                }
+            } else {
+                loadSampleData();
+            }
+            updateCalculations(true);
+        });
     </script>
 
-    <!-- Service Worker Registration for PWA -->
+    <!-- Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+            window.addEventListener('load', function() {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('PWA Service Worker Berjaya Didaftarkan:', reg.scope))
-                    .catch(err => console.error('PWA Service Worker Gagal:', err));
+                    .then(function(reg) { console.log('PWA Service Worker Berjaya Didaftarkan:', reg.scope); })
+                    .catch(function(err) { console.error('PWA Service Worker Gagal:', err); });
             });
         }
     </script>
